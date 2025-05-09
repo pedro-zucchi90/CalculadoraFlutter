@@ -1,0 +1,6 @@
+flutter_native_splash:
+  color: "#7c4dff" #---- Cor do fundo do splash screen 
+  image: images/HeitorScalcoNeto.png #---- Imagem do splash screen 
+  android: true #---- Para o splash screen ocupar toda a tela 
+  ios: true #---- Para o splash screen aparecer no iOS 
+  web: false #---- Para o splash screen aparecer no Web 

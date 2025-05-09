@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:math_expressions/math_expressions.dart';
+import 'splash_screen.dart';
 
 // Função principal que inicia a aplicação
 void main() {
-  runApp(const Calculadora());
+  runApp(const MaterialApp(
+    home: SplashScreenWidget(),
+    debugShowCheckedModeBanner: false,
+  ));
 }
 
 // Classe que DEFINE o estado da calculadora

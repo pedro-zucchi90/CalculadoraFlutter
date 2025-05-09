@@ -30,9 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  math_expressions: ^2.4.0 #---- PARA CONSEGUIR USAR O EVAL E ATUALIZAR O DISPLAY COM O RESULTADO------------
-  flutter_native_splash: ^2.4.6 #---- Para o splash screen -----------
-
+  math_expressions: ^2.4.0
+  flutter_native_splash: ^2.3.10
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -90,9 +89,3 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
 
-flutter_native_splash:
-  color: "#000000" #---- Cor do fundo do splash screen 
-  image: assets/images/HeitorScalcoNeto.png #---- Imagem do splash screen 
-  android: true #---- Para o splash screen ocupar toda a tela 
-  ios: true #---- Para o splash screen aparecer no iOS 
-  web: false #---- Para o splash screen aparecer no Web 
