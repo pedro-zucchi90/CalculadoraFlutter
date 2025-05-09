@@ -6,7 +6,7 @@ void main() {
   runApp(const Calculadora());
 }
 
-// Classe que define o estado da calculadora
+// Classe que DEFINE o estado da calculadora
 class Calculadora extends StatefulWidget {
   const Calculadora({super.key});
 
@@ -14,7 +14,7 @@ class Calculadora extends StatefulWidget {
   _CalculadoraState createState() => _CalculadoraState();
 }
 
-// Classe que gerencia o estado da calculadora
+// Classe que GERENCIA o estado da calculadora
 class _CalculadoraState extends State<Calculadora> {
   String _display = ''; // Variável que armazena o que está sendo exibido na tela
 
@@ -56,7 +56,7 @@ class _CalculadoraState extends State<Calculadora> {
     expression = expression.replaceAll('×', '*').replaceAll('÷', '/'); // Substitui os símbolos de multiplicação e divisão
     Parser p = Parser(); // Cria um parser para analisar a expressão
     Expression exp = p.parse(expression); // Analisa a expressão e cria uma expressão matemática
-    final cm = ContextModel(); // Cria um modelo de contexto para a avaliação caso tenha incógnitas
+    final cm = ContextModel(); // Cria um modelo de contexto com incógnitas (vazio pq só trabalhamos com números)
     return exp.evaluate(EvaluationType.REAL, cm); // Avalia a expressão e retorna o resultado
   }
 
@@ -64,6 +64,7 @@ class _CalculadoraState extends State<Calculadora> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
+        backgroundColor: Colors.grey,
         appBar: AppBar(
           backgroundColor: Colors.deepPurpleAccent,
           title: const Text('Calculadora do Pedro e da Nicolle', style: TextStyle(color: Colors.white, fontSize: 20),

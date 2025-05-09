@@ -1,0 +1,4 @@
+root: D:\Desktop\CalcFlutter\calculadora_boa 
+path: C:\Program Files\nodejs 
+arch: 64 
+proxy: none
