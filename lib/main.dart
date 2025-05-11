@@ -60,33 +60,23 @@ class _CalculadoraState extends State<Calculadora> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.grey,
         appBar: AppBar(
-          backgroundColor: Colors.deepPurple[800],
-          title: const Text(
-            'Calculadora do Heitor Scalco',
-            style: TextStyle(color: Colors.white, fontSize: 20),
+          backgroundColor: Colors.deepPurpleAccent,
+          title: const Text('Calculadora do Pedro e da Nicolle', style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+          leading: const Icon(Icons.calculate, color: Colors.white, size: 30,),
           ),
-          leading: const Icon(Icons.calculate, color: Colors.white, size: 30),
-        ),
+        
         body: Column(
           children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              margin: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey[900],
-                borderRadius: BorderRadius.circular(12),
-              ),
-
-              child: Text(
-                _display,
-                textAlign: TextAlign.right,
-                style: const TextStyle(fontSize: 40, color: Colors.white),
-              ),
+            // Display
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(_display, style: TextStyle(fontSize: 30)),
             ),
 
+            // Botões
             Expanded(
               child: GridView.count(
                 padding: const EdgeInsets.all(8.0),
@@ -94,76 +84,43 @@ class _CalculadoraState extends State<Calculadora> {
                 mainAxisSpacing: 8,
                 crossAxisSpacing: 8,
                 children: [
-                  //Linha 1
-                  construirBotao('7'),
-                  construirBotao('8'),
-                  construirBotao('9'),
-                  construirBotao('÷', operador: true),
+                  // Linha 1
+                  ElevatedButton(onPressed: () => _updateDisplay('7'), child: const Text('7', style: TextStyle(fontSize: 30),)),
+                  ElevatedButton(onPressed: () => _updateDisplay('8'), child: const Text('8', style: TextStyle(fontSize: 30),)),
+                  ElevatedButton(onPressed: () => _updateDisplay('9'), child: const Text('9', style: TextStyle(fontSize: 30),)),
+                  ElevatedButton(onPressed: () => _updateDisplay('÷'), child: const Text('÷', style: TextStyle(fontSize: 60),)),
 
-                  //Linha 2
-                  construirBotao('4'),
-                  construirBotao('5'),
-                  construirBotao('6'),
-                  construirBotao('×', operador: true),
+                  // Linha 2
+                  ElevatedButton(onPressed: () => _updateDisplay('4'), child: const Text('4', style: TextStyle(fontSize: 30),)),
+                  ElevatedButton(onPressed: () => _updateDisplay('5'), child: const Text('5', style: TextStyle(fontSize: 30),)),
+                  ElevatedButton(onPressed: () => _updateDisplay('6'), child: const Text('6', style: TextStyle(fontSize: 30),)),
+                  ElevatedButton(onPressed: () => _updateDisplay('×'), child: const Text('×', style: TextStyle(fontSize: 60),)),
 
-                  //Linha 3
-                  construirBotao('1'),
-                  construirBotao('2'),
-                  construirBotao('3'),
-                  construirBotao('-', operador: true),
+                  // Linha 3
+                  ElevatedButton(onPressed: () => _updateDisplay('1'), child: const Text('1', style: TextStyle(fontSize: 30),)),
+                  ElevatedButton(onPressed: () => _updateDisplay('2'), child: const Text('2', style: TextStyle(fontSize: 30),)),
+                  ElevatedButton(onPressed: () => _updateDisplay('3'), child: const Text('3', style: TextStyle(fontSize: 30),)),
+                  ElevatedButton(onPressed: () => _updateDisplay('-'), child: const Text('-', style: TextStyle(fontSize: 60),)),
 
-                  //Linha 4
-                  construirBotao('=', igual: true),
-                  construirBotao('0'),
-                  construirBotao('.', operador: true),
-                  construirBotao('+', operador: true),
+                  // Linha 4
+                  ElevatedButton(onPressed: () => _showResult(), child: const Text('=', style: TextStyle(fontSize: 60),)),
+                  ElevatedButton(onPressed: () => _updateDisplay('0'), child: const Text('0', style: TextStyle(fontSize: 30),)),
+                  ElevatedButton(onPressed: () => _updateDisplay('.'), child: const Text('.', style: TextStyle(fontSize: 60),)),
+                  ElevatedButton(onPressed: () => _updateDisplay('+'), child: const Text('+', style: TextStyle(fontSize: 60),)),
 
-                  //Linha 5
-                  construirBotao('C', limpar: true),
+                  // Limpar resultado ou display
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _display = '';
+                      });
+                    },
+                    child: const Text('C', style: TextStyle(fontSize: 30),),
+                  ),
                 ],
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget construirBotao(String text, {bool operador = false, bool limpar = false, bool igual = false}) {
-    
-    Color backgroundColor;
-
-    if (limpar) {
-      backgroundColor = Colors.red[800]!;
-    } else if (igual) {
-      backgroundColor = Colors.green[700]!;
-    } else if (operador) {
-      backgroundColor = Colors.deepPurple;
-    } else {
-      backgroundColor = Colors.grey[850]!;
-    }
-
-    return ElevatedButton(
-      onPressed: () {
-        if (limpar) {
-          setState(() => _display = '');
-        } else if (igual) {
-          _showResult();
-        } else {
-          _updateDisplay(text);
-        }
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: backgroundColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        padding: const EdgeInsets.all(12),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: text == '=' || operador || limpar ? 40 : 28,
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
         ),
       ),
     );
