@@ -16,7 +16,7 @@ class _SplashScreenWidgetState extends State<SplashScreenWidget> {
   }
 
   _navigateToHome() async {
-    await Future.delayed(const Duration(seconds: 3));
+    await Future.delayed(const Duration(seconds: 2));
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
@@ -27,7 +27,7 @@ class _SplashScreenWidgetState extends State<SplashScreenWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.deepPurpleAccent,
+      backgroundColor: Colors.deepPurple,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -39,7 +39,7 @@ class _SplashScreenWidgetState extends State<SplashScreenWidget> {
             ),
             const SizedBox(height: 20),
             const Text(
-              'Calculadora do Pedro e da Nicolle',
+              'Calculadora do Heitor Scalco Neto',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,
