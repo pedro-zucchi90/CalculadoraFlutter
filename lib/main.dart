@@ -3,10 +3,19 @@ import 'package:math_expressions/math_expressions.dart';
 import 'splash_screen.dart';
 
 void main() {
-  runApp(const MaterialApp(
-    home: SplashScreenWidget(),
-    debugShowCheckedModeBanner: false,
-  ));
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: const SplashScreenWidget(),
+      debugShowCheckedModeBanner: false, // Remove a faixa de debug
+    );
+  }
 }
 
 class Calculadora extends StatefulWidget {
@@ -66,101 +75,99 @@ class _CalculadoraState extends State<Calculadora> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        backgroundColor: const Color(0xFF0A0C0F),
-        appBar: AppBar(
-          backgroundColor: const Color(0xFF1E1F26),
-          title: const Text(
-            'Hollow Calculator',
-            style: TextStyle(
-              color: Color(0xFFE0E0E0),
-              fontSize: 20,
-              fontFamily: 'Hollow',
+    return Scaffold(
+      backgroundColor: const Color(0xFF0A0C0F),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF1E1F26),
+        title: const Text(
+          'Hollow Calculator',
+          style: TextStyle(
+            color: Color(0xFFE0E0E0),
+            fontSize: 20,
+            fontFamily: 'Hollow',
+          ),
+        ),
+        leading: Image.asset('assets/images/hollow-icon.png'),
+      ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            // Display da calculadora
+            width: double.infinity,
+            height: 200,
+            padding: const EdgeInsets.all(20),
+            margin: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF111319),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  _display,
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(
+                    fontSize: 35,
+                    color: Color(0xFFAAAAAA),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  _resultado,
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(
+                    fontSize: 50,
+                    color: Color(0xFFD0D0D0),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ),
-          leading: Image.asset('assets/images/hollow-icon.png'),
-        ),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Container(
-              // Display da calculadora
-              width: double.infinity,
-              height: 200,
-              padding: const EdgeInsets.all(20),
-              margin: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFF111319),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.end,
+
+          // Botões da calculadora
+          Expanded(
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: GridView.count(
+                padding: const EdgeInsets.all(10.0),
+                crossAxisCount: 4,
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
                 children: [
-                  Text(
-                    _display,
-                    textAlign: TextAlign.right,
-                    style: const TextStyle(
-                      fontSize: 35,
-                      color: Color(0xFFAAAAAA),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    _resultado,
-                    textAlign: TextAlign.right,
-                    style: const TextStyle(
-                      fontSize: 50,
-                      color: Color(0xFFD0D0D0),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  buildButton('C', limpar: true),
+                  buildButton('%', operador: true),
+                  buildButton('√', operador: true),
+                  buildButton('÷', operador: true),
+
+                  buildButton('7'),
+                  buildButton('8'),
+                  buildButton('9'),
+                  buildButton('×', operador: true),
+
+                  buildButton('4'),
+                  buildButton('5'),
+                  buildButton('6'),
+                  buildButton('-', operador: true),
+
+                  buildButton('1'),
+                  buildButton('2'),
+                  buildButton('3'),
+                  buildButton('+', operador: true),
+
+                  buildButton('0'),
+                  buildButton('.', operador: true),
+                  buildButton('=', igual: true),
+                  buildButton('()', parenteses: true),
+                  const SizedBox.shrink(),
                 ],
               ),
             ),
-
-            // Botões da calculadora
-            Expanded(
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: GridView.count(
-                  padding: const EdgeInsets.all(10.0),
-                  crossAxisCount: 4,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                  children: [
-                    buildButton('C', limpar: true),
-                    buildButton('%', operador: true),
-                    buildButton('√', operador: true),
-                    buildButton('÷', operador: true),
-
-                    buildButton('7'),
-                    buildButton('8'),
-                    buildButton('9'),
-                    buildButton('×', operador: true),
-
-                    buildButton('4'),
-                    buildButton('5'),
-                    buildButton('6'),
-                    buildButton('-', operador: true),
-
-                    buildButton('1'),
-                    buildButton('2'),
-                    buildButton('3'),
-                    buildButton('+', operador: true),
-
-                    buildButton('0'),
-                    buildButton('.', operador: true),
-                    buildButton('=', igual: true),
-                    buildButton('()', parenteses: true),
-                    const SizedBox.shrink(),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
