@@ -27,28 +27,29 @@ class _SplashScreenWidgetState extends State<SplashScreenWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.deepPurple,
+      backgroundColor: Color(0xFF0A0C0F), // Fundo principal
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              'assets/images/HeitorScalcoNeto.png',
+              'assets/images/hollow-soul-icon.png',
               width: 100,
               height: 100,
             ),
             const SizedBox(height: 20),
             const Text(
-              'Calculadora do Heitor Scalco Neto',
+              'Hollow Calculator',
               style: TextStyle(
-                color: Colors.white,
+                color: Color(0xFFE0E0E0), // Texto dos botões
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+                fontFamily: 'Hollow'
               ),
             ),
             const SizedBox(height: 20),
             const CircularProgressIndicator(
-              color: Colors.white,
+              color: Color(0xFFE0E0E0), // Texto dos botões
             ),
           ],
         ),
