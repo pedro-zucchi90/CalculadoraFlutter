@@ -33,7 +33,7 @@ class _SplashScreenWidgetState extends State<SplashScreenWidget> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              'assets/images/hollow-soul-icon.png',
+              'assets/images/main-icon.png',
               width: 100,
               height: 100,
             ),

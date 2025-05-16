@@ -2,18 +2,88 @@ import 'package:flutter/material.dart';
 import 'package:math_expressions/math_expressions.dart';
 import 'splash_screen.dart';
 
+final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.dark);
+
+final ThemeData meuTemaClaro = ThemeData.light().copyWith(
+  scaffoldBackgroundColor: const Color(0xFFF5F5F5),
+  appBarTheme: const AppBarTheme(
+    backgroundColor: Colors.white,
+    foregroundColor: Color(0xFF1E1E1E),
+    iconTheme: IconThemeData(color: Color(0xFF1E1E1E)),
+    titleTextStyle: TextStyle(
+      color: Color(0xFF1E1E1E),
+      fontSize: 20,
+      fontFamily: 'Hollow',
+      fontWeight: FontWeight.normal,
+    ),
+  ),
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: const Color(0xFFE0E0E0),
+      foregroundColor: const Color(0xFF1E1E1E),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      padding: const EdgeInsets.all(12),
+      textStyle: const TextStyle(
+        fontWeight: FontWeight.bold,
+        fontFamily: 'Hollow',
+        fontSize: 20,
+      ),
+    ),
+  ),
+  textTheme: const TextTheme(
+    bodyLarge: TextStyle(color: Color(0xFF1E1E1E)),
+  ),
+);
+
+final ThemeData meuTemaEscuro = ThemeData.dark().copyWith(
+  scaffoldBackgroundColor: const Color(0xFF0A0C0F),
+  appBarTheme: const AppBarTheme(
+    backgroundColor: Color(0xFF1E1F26),
+    foregroundColor: Color(0xFFE0E0E0),
+    iconTheme: IconThemeData(color: Color(0xFFE0E0E0)),
+    titleTextStyle: TextStyle(
+      color: Color(0xFFE0E0E0),
+      fontSize: 20,
+      fontFamily: 'Hollow',
+      fontWeight: FontWeight.normal,
+    ),
+  ),
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: const Color(0xFF3A3C4E),
+      foregroundColor: const Color(0xFFE0E0E0),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      padding: const EdgeInsets.all(12),
+      textStyle: const TextStyle(
+        fontWeight: FontWeight.bold,
+        fontFamily: 'Hollow',
+        fontSize: 20,
+      ),
+    ),
+  ),
+  textTheme: const TextTheme(
+    bodyLarge: TextStyle(color: Color(0xFFE0E0E0)),
+  ),
+);
+
 void main() {
-  runApp(const MyApp());
+  runApp(MyRootApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
+class MyRootApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: const SplashScreenWidget(),
-      debugShowCheckedModeBanner: false, // Remove a faixa de debug
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeNotifier,
+      builder: (_, mode, __) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: meuTemaClaro,
+          darkTheme: meuTemaEscuro,
+          themeMode: mode,
+          home: const SplashScreenWidget(),
+        );
+      },
     );
   }
 }
@@ -61,6 +131,12 @@ class _CalculadoraState extends State<Calculadora> {
   double eval(String expression) {
     expression = expression.replaceAll('×', '*').replaceAll('÷', '/');
 
+    // Converte porcentagem: ex 50% -> 50/100
+    expression = expression.replaceAllMapped(
+      RegExp(r'(\d+(\.\d+)?)%'),
+      (match) => '(${match.group(1)}/100)'
+    );
+
     // Substitui √número ou √(expressão) por sqrt(...)
     expression = expression.replaceAllMapped(
       RegExp(r'√(\d+(\.\d+)?|\([^\)]+\))'),
@@ -75,31 +151,41 @@ class _CalculadoraState extends State<Calculadora> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final escuro = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0C0F),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1E1F26),
-        title: const Text(
-          'Hollow Calculator',
-          style: TextStyle(
-            color: Color(0xFFE0E0E0),
-            fontSize: 20,
-            fontFamily: 'Hollow',
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        title: const Text('Hollow Calculator'),
+        leading: Image.asset(escuro ? 'assets/images/hollow-icon-dark.png' : 'assets/images/hollow-icon-light.png'),
+        actions: [
+          ValueListenableBuilder<ThemeMode>(
+            valueListenable: themeNotifier,
+            builder: (_, mode, __) => IconButton(
+              icon: Icon(
+                mode == ThemeMode.dark ? Icons.wb_sunny : Icons.nightlight_round,
+                color: theme.appBarTheme.iconTheme?.color,
+              ),
+              onPressed: () {
+                themeNotifier.value =
+                    themeNotifier.value == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+              },
+            ),
           ),
-        ),
-        leading: Image.asset('assets/images/hollow-icon.png'),
+        ],
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
-            // Display da calculadora
             width: double.infinity,
             height: 200,
             padding: const EdgeInsets.all(20),
             margin: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFF111319),
+              color: escuro ? const Color(0xFF111319) : const Color(0xFFE0E0E0),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -109,26 +195,41 @@ class _CalculadoraState extends State<Calculadora> {
                 Text(
                   _display,
                   textAlign: TextAlign.right,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 35,
-                    color: Color(0xFFAAAAAA),
+                    color: escuro ? const Color(0xFFAAAAAA) : const Color(0xFF333333),
                   ),
                 ),
                 const SizedBox(height: 20),
-                Text(
-                  _resultado,
-                  textAlign: TextAlign.right,
-                  style: const TextStyle(
-                    fontSize: 50,
-                    color: Color(0xFFD0D0D0),
-                    fontWeight: FontWeight.bold,
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder: (Widget child, Animation<double> animation) {
+                    return SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0.0, 1.0),
+                        end: Offset.zero,
+                      ).animate(animation),
+                      child: FadeTransition(
+                        opacity: animation,
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: Text(
+                    _resultado,
+                    key: ValueKey<String>(_resultado),
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      fontSize: 50,
+                      color: escuro ? const Color(0xFFD0D0D0) : const Color(0xFF222222),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
 
-          // Botões da calculadora
           Expanded(
             child: Align(
               alignment: Alignment.bottomCenter,
@@ -138,30 +239,31 @@ class _CalculadoraState extends State<Calculadora> {
                 mainAxisSpacing: 8,
                 crossAxisSpacing: 8,
                 children: [
-                  buildButton('C', limpar: true),
-                  buildButton('%', operador: true),
-                  buildButton('√', operador: true),
-                  buildButton('÷', operador: true),
+                  buildButton('C', limpar: true, escuro: escuro),
+                  buildButton('%', operador: true, escuro: escuro),
+                  buildButton('√', operador: true, escuro: escuro),
+                  buildButton('÷', operador: true, escuro: escuro),
 
-                  buildButton('7'),
-                  buildButton('8'),
-                  buildButton('9'),
-                  buildButton('×', operador: true),
+                  buildButton('7', escuro: escuro),
+                  buildButton('8', escuro: escuro),
+                  buildButton('9', escuro: escuro),
+                  buildButton('×', operador: true, escuro: escuro),
 
-                  buildButton('4'),
-                  buildButton('5'),
-                  buildButton('6'),
-                  buildButton('-', operador: true),
+                  buildButton('4', escuro: escuro),
+                  buildButton('5', escuro: escuro),
+                  buildButton('6', escuro: escuro),
+                  buildButton('-', operador: true, escuro: escuro),
 
-                  buildButton('1'),
-                  buildButton('2'),
-                  buildButton('3'),
-                  buildButton('+', operador: true),
+                  buildButton('1', escuro: escuro),
+                  buildButton('2', escuro: escuro),
+                  buildButton('3', escuro: escuro),
+                  buildButton('+', operador: true, escuro: escuro),
 
-                  buildButton('0'),
-                  buildButton('.', operador: true),
-                  buildButton('=', igual: true),
-                  buildButton('()', parenteses: true),
+                  buildButton('()', parenteses: true, escuro: escuro),
+                  buildButton('0', escuro: escuro),     
+                  buildButton('.', operador: true, escuro: escuro),
+                  buildButton('=', igual: true, escuro: escuro), 
+                  
                   const SizedBox.shrink(),
                 ],
               ),
@@ -173,15 +275,19 @@ class _CalculadoraState extends State<Calculadora> {
   }
 
   Widget buildButton(String text,
-      {bool operador = false, bool limpar = false, bool igual = false, bool parenteses = false}) {
+      {bool operador = false, bool limpar = false, bool igual = false, bool parenteses = false, required bool escuro}) {
     Color backgroundColor;
+    Color textColor;
 
     if (limpar || operador || parenteses) {
-      backgroundColor = const Color(0xFF3A3C4E);
+      backgroundColor = escuro ? const Color(0xFF3A3C4E) : const Color.fromARGB(255, 216, 215, 194);
+      textColor = escuro ? const Color(0xFFE0E0E0) : const Color(0xFF1E1E1E);
     } else if (igual) {
-      backgroundColor = const Color(0xFFB1316A);
+      backgroundColor = escuro ? const Color(0xFFB1316A) : const Color.fromARGB(255, 199, 188, 113);
+      textColor = escuro ? const Color(0xFFE0E0E0) : Colors.white;
     } else {
-      backgroundColor = const Color(0xFF1E1F26);
+      backgroundColor = escuro ? const Color(0xFF1E1F26) : const Color.fromARGB(255, 201, 203, 212);
+      textColor = escuro ? const Color(0xFFE0E0E0) : const Color(0xFF1E1E1E);
     }
 
     return ElevatedButton(
@@ -216,7 +322,7 @@ class _CalculadoraState extends State<Calculadora> {
         text,
         style: TextStyle(
           fontSize: text == '=' || operador || limpar || parenteses ? 40 : 20,
-          color: const Color(0xFFE0E0E0),
+          color: textColor,
           fontWeight: FontWeight.bold,
           fontFamily: 'Hollow',
         ),
