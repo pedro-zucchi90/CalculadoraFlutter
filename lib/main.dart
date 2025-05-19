@@ -109,7 +109,8 @@ class _CalculadoraState extends State<Calculadora> {
     try {
       final result = eval(_display);
       setState(() {
-        _resultado = result.toString();
+        // Limita para no máximo 6 casas decimais e remove zeros desnecessários
+        _resultado = result.toStringAsFixed(6).replaceAll(RegExp(r'\.?0+$'), '');
       });
     } catch (e) {
       showDialog(
@@ -192,12 +193,17 @@ class _CalculadoraState extends State<Calculadora> {
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text(
-                  _display,
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    fontSize: 35,
-                    color: escuro ? const Color(0xFFAAAAAA) : const Color(0xFF333333),
+                Expanded(
+                  child: SingleChildScrollView(
+                    reverse: true, // rola automaticamente para baixo
+                    child: Text(
+                      _display,
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontSize: 35,
+                        color: escuro ? const Color(0xFFAAAAAA) : const Color(0xFF333333),
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -291,7 +297,7 @@ class _CalculadoraState extends State<Calculadora> {
     }
 
     return ElevatedButton(
-      onPressed: () {
+      onPressed: () async {
         if (limpar) {
           setState(() {
             _display = '';
