@@ -129,6 +129,52 @@ class _CalculadoraState extends State<Calculadora> {
     }
   }
 
+  void converterDecimalParaBinario() {
+  try {
+    int valorDecimal = int.parse(_resultado.isNotEmpty ? _resultado : _display);
+    setState(() {
+        _resultado = valorDecimal.toRadixString(2);
+      });
+    } catch (e) {
+      _mostrarErro('Digite um número decimal válido para converter.');
+    }
+  }
+
+  void converterBinarioParaDecimal() {
+    try {
+      int valorDecimal = int.parse(_resultado.isNotEmpty ? _resultado : _display, radix: 2);
+      setState(() {
+        _resultado = valorDecimal.toString();
+      });
+    } catch (e) {
+      _mostrarErro('Digite um número binário válido para converter.');
+    }
+  }
+
+  void _mostrarErro(String mensagem) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Erro'),
+        content: Text(mensagem),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _apagarUltimoCaractere() {
+    setState(() {
+      if (_display.isNotEmpty) {
+        _display = _display.substring(0, _display.length - 1);
+      }
+    });
+  }
+
   double eval(String expression) {
     expression = expression.replaceAll('×', '*').replaceAll('÷', '/');
 
@@ -181,54 +227,52 @@ class _CalculadoraState extends State<Calculadora> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
             width: double.infinity,
-            height: 200,
-            padding: const EdgeInsets.all(20),
-            margin: const EdgeInsets.all(12),
+            height: 150,
             decoration: BoxDecoration(
-              color: escuro ? const Color(0xFF111319) : const Color(0xFFE0E0E0),
-              borderRadius: BorderRadius.circular(12),
+              color: escuro ? const Color(0xFF303030) : const Color(0xFFE0E0E0),
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
+                // DISPLAY
                 Expanded(
                   child: SingleChildScrollView(
-                    reverse: true, // rola automaticamente para baixo
-                    child: Text(
-                      _display,
-                      textAlign: TextAlign.right,
-                      style: TextStyle(
-                        fontSize: 35,
-                        color: escuro ? const Color(0xFFAAAAAA) : const Color(0xFF333333),
+                    scrollDirection: Axis.vertical,
+                    reverse: true,
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        _display,
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          fontSize: 25,
+                          color: escuro ? const Color(0xFFD0D0D0) : const Color(0xFF444444),
+                        ),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  transitionBuilder: (Widget child, Animation<double> animation) {
-                    return SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0.0, 1.0),
-                        end: Offset.zero,
-                      ).animate(animation),
-                      child: FadeTransition(
-                        opacity: animation,
-                        child: child,
+                const SizedBox(height: 10),
+                // RESULTADO
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    reverse: true,
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        _resultado,
+                        key: ValueKey<String>(_resultado),
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          fontSize: 45,
+                          color: escuro ? const Color(0xFFD0D0D0) : const Color(0xFF222222),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    );
-                  },
-                  child: Text(
-                    _resultado,
-                    key: ValueKey<String>(_resultado),
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      fontSize: 50,
-                      color: escuro ? const Color(0xFFD0D0D0) : const Color(0xFF222222),
-                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
@@ -245,10 +289,15 @@ class _CalculadoraState extends State<Calculadora> {
                 mainAxisSpacing: 8,
                 crossAxisSpacing: 8,
                 children: [
+                  buildButton('BIN', binario: true, escuro: escuro),
+                  buildButton('DEC', decimal: true, escuro: escuro),
+                  buildButton('√', operador: true, escuro: escuro),
+                  buildButton('^', operador: true, escuro: escuro),
+                  
                   buildButton('C', limpar: true, escuro: escuro),
                   buildButton('%', operador: true, escuro: escuro),
-                  buildButton('√', operador: true, escuro: escuro),
-                  buildButton('÷', operador: true, escuro: escuro),
+                  buildButton('+', operador: true, escuro: escuro),
+                  buildButton('-', operador: true, escuro: escuro),
 
                   buildButton('7', escuro: escuro),
                   buildButton('8', escuro: escuro),
@@ -258,18 +307,19 @@ class _CalculadoraState extends State<Calculadora> {
                   buildButton('4', escuro: escuro),
                   buildButton('5', escuro: escuro),
                   buildButton('6', escuro: escuro),
-                  buildButton('-', operador: true, escuro: escuro),
+                  buildButton('÷', operador: true, escuro: escuro),
 
                   buildButton('1', escuro: escuro),
                   buildButton('2', escuro: escuro),
                   buildButton('3', escuro: escuro),
-                  buildButton('+', operador: true, escuro: escuro),
+                  buildButton('⌫', apagar: true, escuro: escuro),
 
                   buildButton('()', parenteses: true, escuro: escuro),
                   buildButton('0', escuro: escuro),     
                   buildButton('.', operador: true, escuro: escuro),
                   buildButton('=', igual: true, escuro: escuro), 
-                  
+                
+
                   const SizedBox.shrink(),
                 ],
               ),
@@ -280,54 +330,75 @@ class _CalculadoraState extends State<Calculadora> {
     );
   }
 
-  Widget buildButton(String text,
-      {bool operador = false, bool limpar = false, bool igual = false, bool parenteses = false, required bool escuro}) {
+  Widget buildButton(
+    String text, {
+    bool operador = false,
+    bool limpar = false,
+    bool igual = false,
+    bool parenteses = false,
+    bool binario = false,
+    bool decimal = false,
+    bool apagar = false,
+    required bool escuro,
+  }) {
     Color backgroundColor;
     Color textColor;
 
-    if (limpar || operador || parenteses) {
-      backgroundColor = escuro ? const Color(0xFF3A3C4E) : const Color.fromARGB(255, 216, 215, 194);
-      textColor = escuro ? const Color(0xFFE0E0E0) : const Color(0xFF1E1E1E);
-    } else if (igual) {
-      backgroundColor = escuro ? const Color(0xFFB1316A) : const Color.fromARGB(255, 199, 188, 113);
-      textColor = escuro ? const Color(0xFFE0E0E0) : Colors.white;
+    if (operador || parenteses || binario || decimal) {
+      backgroundColor = escuro
+          ? const Color(0xFF3A3C4E)
+          : const Color.fromARGB(255, 216, 215, 194);
+      textColor = escuro
+          ? const Color(0xFFE0E0E0)
+          : const Color(0xFF1E1E1E);
+    } else if (igual || apagar || limpar) {
+      backgroundColor = escuro
+          ? const Color(0xFFB1316A)
+          : const Color.fromARGB(255, 199, 188, 113);
+      textColor = escuro
+          ? const Color(0xFFE0E0E0)
+          : Colors.white;
     } else {
-      backgroundColor = escuro ? const Color(0xFF1E1F26) : const Color.fromARGB(255, 201, 203, 212);
-      textColor = escuro ? const Color(0xFFE0E0E0) : const Color(0xFF1E1E1E);
+      backgroundColor = escuro
+          ? const Color(0xFF1E1F26)
+          : const Color.fromARGB(255, 201, 203, 212);
+      textColor = escuro
+          ? const Color(0xFFE0E0E0)
+          : const Color(0xFF1E1E1E);
     }
 
     return ElevatedButton(
-      onPressed: () async {
-        if (limpar) {
-          setState(() {
-            _display = '';
-            _resultado = '';
-          });
-        } else if (igual) {
-          _showResult();
-        } else if (parenteses) {
-          final aberto = '('.allMatches(_display).length;
-          final fechado = ')'.allMatches(_display).length;
-          setState(() {
-            _display += (aberto > fechado) ? ')' : '(';
-          });
-        } else if (text == '√') {
-          setState(() {
-            _display += '√';
-          });
-        } else {
-          _updateDisplay(text);
-        }
-      },
       style: ElevatedButton.styleFrom(
         backgroundColor: backgroundColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         padding: const EdgeInsets.all(12),
       ),
+      onPressed: () {
+        setState(() {
+          if (limpar) {
+            _display = '';
+            _resultado = '';
+          } else if (igual) {
+            _showResult();
+          } else if (binario) {
+            converterDecimalParaBinario();
+          } else if (decimal) {
+            converterBinarioParaDecimal();
+          } else if (parenteses) {
+            final aberto = '('.allMatches(_display).length;
+            final fechado = ')'.allMatches(_display).length;
+            _display += (aberto > fechado) ? ')' : '(';
+          } else if (apagar) {
+            _apagarUltimoCaractere();
+          } else {
+            _updateDisplay(text);
+          }
+        });
+      },
       child: Text(
         text,
         style: TextStyle(
-          fontSize: text == '=' || operador || limpar || parenteses ? 40 : 20,
+          fontSize: (igual || operador || limpar || parenteses || apagar) ? 35 : 20,
           color: textColor,
           fontWeight: FontWeight.bold,
           fontFamily: 'Hollow',
