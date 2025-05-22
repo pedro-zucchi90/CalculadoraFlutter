@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:math_expressions/math_expressions.dart';
+import 'package:vibration/vibration.dart';
 import 'splash_screen.dart';
 
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.dark);
@@ -101,7 +102,7 @@ class _CalculadoraState extends State<Calculadora> {
 
   void vibrar() async {
     if (await Vibration.hasVibrator() ?? false) {
-      Vibration.vibrate(duration: 30);
+      Vibration.vibrate(duration: 50);
     }
   }
 
@@ -375,8 +376,9 @@ class _CalculadoraState extends State<Calculadora> {
         padding: const EdgeInsets.all(12),
       ),
       onPressed: () async {
-        if (limpar) {
-          setState(() {
+        vibrar();
+        setState(() {
+          if (limpar) {
             _display = '';
             _resultado = '';
           } else if (igual) {
