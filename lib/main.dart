@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:math_expressions/math_expressions.dart';
-import 'package:vibration/vibration.dart';
 import 'splash_screen.dart';
 
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.dark);
@@ -100,6 +99,12 @@ class _CalculadoraState extends State<Calculadora> {
   String _display = '';
   String _resultado = '';
 
+  void vibrar() async {
+    if (await Vibration.hasVibrator() ?? false) {
+      Vibration.vibrate(duration: 30);
+    }
+  }
+
   void _updateDisplay(String value) {
     setState(() {
       _display += value;
@@ -110,7 +115,6 @@ class _CalculadoraState extends State<Calculadora> {
     try {
       final result = eval(_display);
       setState(() {
-        // Limita para no máximo 6 casas decimais e remove zeros desnecessários
         _resultado = result.toStringAsFixed(6).replaceAll(RegExp(r'\.?0+$'), '');
       });
     } catch (e) {
@@ -179,15 +183,13 @@ class _CalculadoraState extends State<Calculadora> {
   double eval(String expression) {
     expression = expression.replaceAll('×', '*').replaceAll('÷', '/');
 
-    // Converte porcentagem: ex 50% -> 50/100
     expression = expression.replaceAllMapped(
       RegExp(r'(\d+(\.\d+)?)%'),
       (match) => '(${match.group(1)}/100)'
     );
 
-    // Substitui √número ou √(expressão) por sqrt(...)
     expression = expression.replaceAllMapped(
-      RegExp(r'√(\d+(\.\d+)?|\([^\)]+\))'),
+      RegExp(r'√(\d+(\.\d+)?|[^]+)'),
       (match) => 'sqrt(${match.group(1)})'
     );
 
@@ -242,17 +244,13 @@ class _CalculadoraState extends State<Calculadora> {
                 // DISPLAY
                 Expanded(
                   child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    reverse: true,
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        _display,
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                          fontSize: 25,
-                          color: escuro ? const Color(0xFFD0D0D0) : const Color(0xFF444444),
-                        ),
+                    reverse: true, // rola automaticamente para baixo
+                    child: Text(
+                      _display,
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontSize: 35,
+                        color: escuro ? const Color(0xFFAAAAAA) : const Color(0xFF333333),
                       ),
                     ),
                   ),
@@ -377,13 +375,8 @@ class _CalculadoraState extends State<Calculadora> {
         padding: const EdgeInsets.all(12),
       ),
       onPressed: () async {
-        // Vibração ao pressionar o botão
-        if (await Vibration.hasVibrator() ?? false) {
-          Vibration.vibrate(duration: 50);
-        }
-        
-        setState(() {
-          if (limpar) {
+        if (limpar) {
+          setState(() {
             _display = '';
             _resultado = '';
           } else if (igual) {
