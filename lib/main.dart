@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:math_expressions/math_expressions.dart';
+import 'package:vibration/vibration.dart';
 import 'splash_screen.dart';
 
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.dark);
@@ -223,6 +224,7 @@ class _CalculadoraState extends State<Calculadora> {
           ),
         ],
       ),
+
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -330,6 +332,7 @@ class _CalculadoraState extends State<Calculadora> {
     );
   }
 
+
   Widget buildButton(
     String text, {
     bool operador = false,
@@ -373,7 +376,12 @@ class _CalculadoraState extends State<Calculadora> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         padding: const EdgeInsets.all(12),
       ),
-      onPressed: () {
+      onPressed: () async {
+        // Vibração ao pressionar o botão
+        if (await Vibration.hasVibrator() ?? false) {
+          Vibration.vibrate(duration: 50);
+        }
+        
         setState(() {
           if (limpar) {
             _display = '';
