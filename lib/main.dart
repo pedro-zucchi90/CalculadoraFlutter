@@ -356,7 +356,7 @@ class _CalculadoraState extends State<Calculadora> {
     } else if (igual || apagar || limpar) {
       backgroundColor = escuro
           ? const Color(0xFFB1316A)
-          : const Color.fromARGB(255, 199, 188, 113);
+          : const Color(0xFFC28D27);
       textColor = escuro
           ? const Color(0xFFE0E0E0)
           : Colors.white;
