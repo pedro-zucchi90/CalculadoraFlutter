@@ -100,61 +100,23 @@ class _CalculadoraState extends State<Calculadora> {
   String _display = '';
   String _resultado = '';
 
-  void vibrar() async {
-    if (await Vibration.hasVibrator() ?? false) {
-      Vibration.vibrate(duration: 50);
-    }
-  }
+  double eval(String expression) {
+    expression = expression.replaceAll('×', '*').replaceAll('÷', '/'); // Substitui símbolos de multiplicação e divisão por seus equivalentes matemáticos
+    
+    expression = expression.replaceAllMapped(
+      RegExp(r'(\d+(\.\d+)?)%'),
+      (match) => '(${match.group(1)}/100)'
+    ); // Substitui porcentagem por divisão por 100 para calcular o valor percentual
 
-  void _updateDisplay(String value) {
-    setState(() {
-      _display += value;
-    });
-  }
+    expression = expression.replaceAllMapped(
+      RegExp(r'√(\d+(\.\d+)?|[^]+)'),
+      (match) => 'sqrt(${match.group(1)})'
+    ); // Substitui raiz quadrada por sua função matemática correspondente
 
-  void _showResult() {
-    try {
-      final result = eval(_display);
-      setState(() {
-        _resultado = result.toStringAsFixed(6).replaceAll(RegExp(r'\.?0+$'), '');
-      });
-    } catch (e) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Erro'),
-          content: const Text('Erro ao calcular o resultado'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-    }
-  }
-
-  void converterDecimalParaBinario() {
-  try {
-    int valorDecimal = int.parse(_resultado.isNotEmpty ? _resultado : _display);
-    setState(() {
-        _resultado = valorDecimal.toRadixString(2);
-      });
-    } catch (e) {
-      _mostrarErro('Digite um número decimal válido para converter.');
-    }
-  }
-
-  void converterBinarioParaDecimal() {
-    try {
-      int valorDecimal = int.parse(_resultado.isNotEmpty ? _resultado : _display, radix: 2);
-      setState(() {
-        _resultado = valorDecimal.toString();
-      });
-    } catch (e) {
-      _mostrarErro('Digite um número binário válido para converter.');
-    }
+    Parser p = Parser(); // Cria um novo parser para analisar a expressão
+    Expression exp = p.parse(expression); // Analisa a expressão e retorna uma instância de Expression
+    ContextModel cm = ContextModel(); // Neste caso, não é necessário criar um novo modelo de contexto para a avaliação, pois o contexto não é utilizado na avaliação da expressão. No entanto, é obrigatório passar um contexto para o método evaluate, então um contexto vazio é criado para atender a essa exigência.
+    return exp.evaluate(EvaluationType.REAL, cm); // Avalia a expressão matemática e retorna o resultado
   }
 
   void _mostrarErro(String mensagem) {
@@ -162,7 +124,7 @@ class _CalculadoraState extends State<Calculadora> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Erro'),
-        content: Text(mensagem),
+        content: Text(mensagem), // Mostra a mensagem de erro específica
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -173,31 +135,136 @@ class _CalculadoraState extends State<Calculadora> {
     );
   }
 
+  void vibrar() async {
+    if (await Vibration.hasVibrator() ?? false) {  // Verifica se o dispositivo tem um vibrador e, se sim, faz o dispositivo vibrar por 50 milissegundos
+      Vibration.vibrate(duration: 50); 
+    }
+  }
+
+  void _updateDisplay(String value) {
+    setState(() {
+      _display += value; // Concatena o novo valor à string de display
+    });
+  }
+
+  void _showResult() {
+    try {
+      final result = eval(_display); // Calcula o resultado da expressão matemática
+      setState(() {
+        _resultado = result.toStringAsFixed(6).replaceAll(RegExp(r'\.?0+$'), ''); // Atualiza o resultado com o valor calculado, formatado para ter no máximo 6 casas decimais e sem zeros à direita. 
+        //O RegExp '\.?0+$' é usado para remover os zeros à direita e o ponto decimal se não houver mais casas decimais.
+      });
+    } catch (e) {
+      _mostrarErro('Erro ao calcular o resultado'); // Mostra um erro se a expressão não puder ser avaliada
+    }
+  }
+
+  void converterDecimalParaBinario() {
+  try {
+    int valorDecimal = int.parse(_resultado.isNotEmpty ? _resultado : _display); // Converte o resultado ou display para um número decimal
+    setState(() {
+        _resultado = valorDecimal.toRadixString(2); // Atualiza o resultado com o valor binário correspondente
+      });
+    } catch (e) {
+      _mostrarErro('Digite um número decimal válido para converter.'); // Mostra um erro se o número não for decimal válido
+    }
+  }
+
+  void converterBinarioParaDecimal() {
+    try {
+      int valorDecimal = int.parse(_resultado.isNotEmpty ? _resultado : _display, radix: 2); // Converte o resultado ou display para decimal a partir do binário
+      setState(() {
+        _resultado = valorDecimal.toString(); // Atualiza o resultado com o valor decimal correspondente
+      });
+    } catch (e) {
+      _mostrarErro('Digite um número binário válido para converter.'); // Mostra um erro se o número não for binário válido
+    }
+  }
+
   void _apagarUltimoCaractere() {
     setState(() {
       if (_display.isNotEmpty) {
-        _display = _display.substring(0, _display.length - 1);
+        _display = _display.substring(0, _display.length - 1); // Remove o último caractere da string de display
       }
     });
   }
 
-  double eval(String expression) {
-    expression = expression.replaceAll('×', '*').replaceAll('÷', '/');
+  Widget buildButton(
+    String text, {
+    bool operador = false,
+    bool limpar = false,
+    bool igual = false,
+    bool parenteses = false,
+    bool binario = false,
+    bool decimal = false,
+    bool apagar = false,
+    required bool escuro,
+  }) {
+    Color backgroundColor;
+    Color textColor;
 
-    expression = expression.replaceAllMapped(
-      RegExp(r'(\d+(\.\d+)?)%'),
-      (match) => '(${match.group(1)}/100)'
+    if (operador || parenteses || binario || decimal) {
+      backgroundColor = escuro
+          ? const Color(0xFF3A3C4E)
+          : const Color.fromARGB(255, 216, 215, 194);
+      textColor = escuro
+          ? const Color(0xFFE0E0E0)
+          : const Color(0xFF1E1E1E);
+    } else if (igual || apagar || limpar) {
+      backgroundColor = escuro
+          ? const Color(0xFFB1316A)
+          : const Color(0xFFC28D27);
+      textColor = escuro
+          ? const Color(0xFFE0E0E0)
+          : Colors.white;
+    } else {
+      backgroundColor = escuro
+          ? const Color(0xFF1E1F26)
+          : const Color.fromARGB(255, 201, 203, 212);
+      textColor = escuro
+          ? const Color(0xFFE0E0E0)
+          : const Color(0xFF1E1E1E);
+    }
+
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: backgroundColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        padding: const EdgeInsets.all(12),
+      ),
+      onPressed: () async {
+        vibrar();
+        setState(() {
+          if (limpar) {
+            _display = '';
+            _resultado = '';
+          } else if (igual) {
+            _showResult();
+          } else if (binario) {
+            converterDecimalParaBinario();
+          } else if (decimal) {
+            converterBinarioParaDecimal();
+          } else if (parenteses) {
+            final aberto = '('.allMatches(_display).length;
+            final fechado = ')'.allMatches(_display).length;
+            _display += (aberto > fechado) ? ')' : '(';
+          } else if (apagar) {
+            _apagarUltimoCaractere();
+          } else {
+            _updateDisplay(text);
+          }
+        });
+      },
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: (igual || operador || limpar || parenteses || apagar) ? 35 : 20,
+          color: textColor,
+          fontWeight: FontWeight.bold,
+          fontFamily: 'Hollow',
+        ),
+      ),
     );
-
-    expression = expression.replaceAllMapped(
-      RegExp(r'√(\d+(\.\d+)?|[^]+)'),
-      (match) => 'sqrt(${match.group(1)})'
-    );
-
-    Parser p = Parser();
-    Expression exp = p.parse(expression);
-    final cm = ContextModel();
-    return exp.evaluate(EvaluationType.REAL, cm);
   }
 
   @override
@@ -327,85 +394,6 @@ class _CalculadoraState extends State<Calculadora> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-
-  Widget buildButton(
-    String text, {
-    bool operador = false,
-    bool limpar = false,
-    bool igual = false,
-    bool parenteses = false,
-    bool binario = false,
-    bool decimal = false,
-    bool apagar = false,
-    required bool escuro,
-  }) {
-    Color backgroundColor;
-    Color textColor;
-
-    if (operador || parenteses || binario || decimal) {
-      backgroundColor = escuro
-          ? const Color(0xFF3A3C4E)
-          : const Color.fromARGB(255, 216, 215, 194);
-      textColor = escuro
-          ? const Color(0xFFE0E0E0)
-          : const Color(0xFF1E1E1E);
-    } else if (igual || apagar || limpar) {
-      backgroundColor = escuro
-          ? const Color(0xFFB1316A)
-          : const Color(0xFFC28D27);
-      textColor = escuro
-          ? const Color(0xFFE0E0E0)
-          : Colors.white;
-    } else {
-      backgroundColor = escuro
-          ? const Color(0xFF1E1F26)
-          : const Color.fromARGB(255, 201, 203, 212);
-      textColor = escuro
-          ? const Color(0xFFE0E0E0)
-          : const Color(0xFF1E1E1E);
-    }
-
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: backgroundColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        padding: const EdgeInsets.all(12),
-      ),
-      onPressed: () async {
-        vibrar();
-        setState(() {
-          if (limpar) {
-            _display = '';
-            _resultado = '';
-          } else if (igual) {
-            _showResult();
-          } else if (binario) {
-            converterDecimalParaBinario();
-          } else if (decimal) {
-            converterBinarioParaDecimal();
-          } else if (parenteses) {
-            final aberto = '('.allMatches(_display).length;
-            final fechado = ')'.allMatches(_display).length;
-            _display += (aberto > fechado) ? ')' : '(';
-          } else if (apagar) {
-            _apagarUltimoCaractere();
-          } else {
-            _updateDisplay(text);
-          }
-        });
-      },
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: (igual || operador || limpar || parenteses || apagar) ? 35 : 20,
-          color: textColor,
-          fontWeight: FontWeight.bold,
-          fontFamily: 'Hollow',
-        ),
       ),
     );
   }
